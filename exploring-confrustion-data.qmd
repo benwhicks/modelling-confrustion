@@ -1,0 +1,62 @@
+---
+title: "Exploring confrustion data"
+format: html
+---
+
+# Loading data
+
+This data set is from CMU Data Shop as part of the [Adapterrex project](https://pslcdatashop.web.cmu.edu/Project?id=67). 
+
+``` {r}
+library(tidyverse)
+library(janitor)
+all.data <- read_delim("data/All_Data_1839_2012_1128_083346-revised.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_types = cols(
+        `Tutor Response Subtype` = col_character(),
+        Input...23 = col_character(), 
+        Input...24 = col_character(), Input...25 = col_character(), 
+        Input...26 = col_character(), Input...27 = col_character(), 
+        Input...28 = col_character(), `Feedback Classification` = col_character(), 
+        `Help Level` = col_character(), `Total Num Hints` = col_character(), 
+        `KC Category(Single-KC)` = col_character()), 
+    trim_ws = TRUE) |> 
+    clean_names() |> 
+    remove_empty("cols") |> 
+    remove_empty("rows")
+
+# checking character variables with not many values
+all.data |> 
+    select(where(is.character)) |> 
+    summarise(across(everything(), ~length(unique(.)), .names = "{.col}")) |> 
+    pivot_longer(everything(), names_to = "variable", values_to = "unique_values") |> 
+    arrange(unique_values)
+
+df <- 
+    all.data |> 
+    filter(!is.na(school), !is.na(class)) |> 
+    select(-starts_with("input_")) |> 
+    select(-sample_name, -time_zone, -student_response_type,
+           -condition_type, -school, -class)
+
+df |> 
+    select(where(is.character)) |> 
+    summarise(across(everything(), ~length(unique(.)), .names = "{.col}")) |> 
+    pivot_longer(everything(), names_to = "variable", values_to = "unique_values") |> 
+    arrange(unique_values)
+
+# curious about 
+# - level_assignment
+# - condition_name (which is the same as level_assignment)
+# - 
+```
+
+``` {r}
+library(tidyverse)
+library(readxl)
+Spring_2019 <- read_excel("data/Spring 2019.xlsx", 
+    sheet = "errex_s19_outcomes2", skip = 1)
+excel_sheets("data/Fall 2018.xlsx")
+Fall_2019 <- read_excel("data/Fall 2018.xlsx", 
+    sheet = "ef2018-Main variables", skip = 1)
+```
